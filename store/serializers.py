@@ -6,7 +6,7 @@ from .models import Collection, Product
 
 
 class CollectionSerializer(serializers.ModelSerializer):
-    products_count = serializers.IntegerField()
+    products_count = serializers.IntegerField(read_only=True)
     featured_product = serializers.StringRelatedField()
 
     class Meta:
@@ -15,8 +15,10 @@ class CollectionSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializers(serializers.ModelSerializer):
-    price_with_tax = serializers.SerializerMethodField(method_name="calculate_tax")
-    # collection = serializers.StringRelatedField()
+    price_with_tax = serializers.SerializerMethodField(
+        method_name="calculate_tax", read_only=True
+    )
+    collection = serializers.StringRelatedField(read_only=True)
 
     class Meta:
         model = Product
