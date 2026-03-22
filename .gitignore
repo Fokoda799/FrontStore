@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+.venv/
+pipenv/
+
+# Pipenv
+Pipfile.lock
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Django migrations cache
+*/migrations/__pycache__/
+
+# Static files
+staticfiles/
+
+# Environment variables
+.env
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# build artifacts
+dist/
+build/
+*.egg-info/
+
+# pre-commit
+.pre-commit-config.yaml.cache
+
+# Logs
+*.log
