@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from django.core.validators import MinValueValidator
 from django.db import models
 
@@ -133,6 +135,7 @@ class OrderItem(models.Model):
 
 
 class Cart(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -143,14 +146,24 @@ class Cart(models.Model):
 
 
 class CartItem(models.Model):
-    quantity = models.PositiveSmallIntegerField()
+    quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
     # One to Many Relationship
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="items")
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
 
     def __str__(self):
         return f"CART-ITEM-{self.id}"
 
     class Meta:
         ordering = ["quantity"]
+        unique_together = [["cart", "product"]]
+
+
+class Review(models.Model):
+    name = models.CharField(max_length=255)
+    text = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="reviews"
+    )

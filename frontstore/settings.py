@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "django_filters",
     "playground",
     "store",
     "tags",
@@ -128,4 +129,4 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-REST_FRAMEWORK = {"COERCE_DECIMAL_TO_STRING": False}
+REST_FRAMEWORK = {"COERCE_DECIMAL_TO_STRING": False, "PAGE_SIZE": 10}
