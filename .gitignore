@@ -9,8 +9,6 @@ env/
 .venv/
 pipenv/
 
-# Pipenv
-Pipfile.lock
 
 # Django
 *.log
