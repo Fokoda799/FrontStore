@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Store API</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 40px;
+                background-color: #f5f7fa;
+            }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.05);
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h2 {
+            margin-top: 30px;
+            color: #444;
+        }
+
+        ul {
+            line-height: 1.8;
+        }
+
+        a {
+            text-decoration: none;
+            color: #2563eb;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        code {
+            background-color: #eee;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+
+    </head>
+
+    <body>
+
+    <div class="container">
+    <h1>🛒 Store API</h1>
+
+    <p>
+        Welcome to the Store API.  
+        This API provides endpoints to manage products, collections, carts, and orders.
+    </p>
+
+    <h2>Available Endpoints</h2>
+
+    <ul>
+        <li>
+            <a href="/store/products/">/store/products/</a>  
+            — List all products
+        </li>
+
+        <li>
+            <a href="/store/collections/">/store/collections/</a>  
+            — List product collections
+        </li>
+
+        <li>
+            <a href="/store/carts/">/store/carts/</a>  
+            — Create and manage carts
+        </li>
+
+        <li>
+            <a href="/store/orders/">/store/orders/</a>  
+            — Manage orders
+        </li>
+
+        <li>
+            <a href="/play/hello/">/play/hello/</a>  
+            — Test endpoint
+        </li>
+    </ul>
+
+    <h2>Example Query</h2>
+
+    <p>
+        Filter products by collection:
+    </p>
+
+    <p>
+        <code>/store/products/?collection_id=1</code>
+    </p>
+
+    <div class="footer">
+        <p>
+            Store API — Development Mode 🚧
+        </p>
+    </div>
+    </div>
+
+    </body>
+</html>

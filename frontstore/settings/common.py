@@ -10,22 +10,21 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-r-n#9jk6j(i3ot0v-mj*49_sikp6mn-(q+p_2u$(9$8l(kd9sy"
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -37,18 +36,23 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
     "django_filters",
+    "corsheaders",
+    "debug_toolbar",
+    "rest_framework",
+    "djoser",
+    "silk",
     "playground",
     "store",
     "tags",
-    "custom_store",
-    "debug_toolbar",
+    "core",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -57,7 +61,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
 INTERNAL_IPS = ["127.0.0.1"]
+
+CORS_ALLOWED_ORIGINS = ["http://localhost:5500", "http://127.0.0.1:5500"]
 
 ROOT_URLCONF = "frontstore.urls"
 
@@ -79,26 +86,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "frontstore.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "frontstore",
-        "HOST": "localhost",
-        "USER": "root",
-        "PASSWORD": "wac2003A",
-    }
-}
-
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation\
+            .UserAttributeSimilarityValidator",
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -128,5 +122,83 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
-REST_FRAMEWORK = {"COERCE_DECIMAL_TO_STRING": False, "PAGE_SIZE": 10}
+MEDIA_URL = "media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+REST_FRAMEWORK = {
+    "COERCE_DECIMAL_TO_STRING": False,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
+}
+
+SIMPLE_JWT = {"AUTH_HEADER_TYPES": ("JWT",), "ACCESS_TOKEN_LIFETIME": timedelta(days=1)}
+
+DJOSER = {
+    "SERIALIZERS": {
+        "user_create": "core.serializers.UserCreateSerializer",
+        "current_user": "core.serializers.UserSerializer",
+    }
+}
+
+
+AUTH_USER_MODEL = "core.User"
+
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "localhost"
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
+EMAIL_PORT = "25"
+DEFAULT_FROM_EMAIL = "from@fokoda.com"
+
+ADMINS = [("Siad", "admin@fokoda.com")]
+
+
+CELERY_BROKER_URL = "redis://localhost:6379/1"
+CELERY_BEAT_SCHEDULE = {
+    "notify_costumers": {
+        "task": "playground.tasks.notify_costumers",
+        "schedule": 5,
+        "args": ["Hello World!"],
+    }
+}
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/2",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler", "formatter": "verbose"},
+        "file": {
+            "class": "logging.FileHandler",
+            "filename": "general.log",
+            "formatter": "verbose",
+        },
+    },
+    "loggers": {
+        "": {
+            "handlers": ["console", "file"],
+            "level": os.environ.get("DJANGO_LOG_LEVEL", "INFO"),
+        }
+    },
+    "formatters": {
+        "verbose": {
+            "format": "{asctime} ({levelname}) - {name} - {message}",
+            "style": "{",
+        }
+    },
+}

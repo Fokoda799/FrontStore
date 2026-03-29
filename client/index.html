@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <title>Upload File to Django</title>
+        <style>
+            body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f2f5;
+            }
+            form {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            }
+            input[type="file"] {
+            margin-bottom: 15px;
+            }
+            button {
+            padding: 8px 16px;
+            border: none;
+            background: #007BFF;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+            }
+            button:hover {
+            background: #0056b3;
+            }
+        </style>
+    </head>
+    <body>
+
+        <form id="uploadForm">
+            <h2>Upload File</h2>
+            <input type="file" name="image" required>
+            <br>
+            <button type="submit">Upload</button>
+        </form>
+
+        <script>
+        const form = document.getElementById("uploadForm");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+
+            const formData = new FormData(form);
+
+            console.log(formData)
+            
+            // Replace URL with your Django upload endpoint
+            const uploadUrl = "http://localhost:9000/store/products/6/images/";
+
+            try {
+            const response = await fetch(uploadUrl, {
+                method: "POST",
+                body: formData,
+                headers: {
+                // If using DRF JWT / Token Auth, add it here:
+                // "Authorization": "Bearer YOUR_TOKEN_HERE"
+                }
+            });
+
+            const result = await response.json();
+            alert("Upload successful!\n" + JSON.stringify(result));
+            } catch (err) {
+            console.error(err);
+            alert("Upload failed.");
+            }
+        });
+        </script>
+
+    </body>
+</html>

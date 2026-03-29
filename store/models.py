@@ -1,7 +1,11 @@
 from uuid import uuid4
 
+from django.conf import settings
+from django.contrib import admin
 from django.core.validators import MinValueValidator
 from django.db import models
+
+from .validators import validate_file_size
 
 
 class Promotion(models.Model):
@@ -53,6 +57,13 @@ class Product(models.Model):
         return self.title
 
 
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="images"
+    )
+    image = models.ImageField(upload_to="store/images", validators=[validate_file_size])
+
+
 class Costumer(models.Model):
     MEMBERSHIP_BRONZE = "B"
     MEMBERSHIP_SILVER = "S"
@@ -63,17 +74,24 @@ class Costumer(models.Model):
         (MEMBERSHIP_GOLD, "Gold"),
     ]
 
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    email = models.EmailField(unique=True)
-    phone = models.CharField(max_length=255)
-    birth_date = models.DateField(null=False)
+    phone = models.CharField(max_length=255, blank=True)
+    birth_date = models.DateField(null=True, blank=True)
     membership = models.CharField(
         max_length=1, choices=MEMBERSHIP, default=MEMBERSHIP_BRONZE
     )
 
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
     def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+        return f"{self.user.first_name} {self.user.last_name}"
+
+    @admin.display(ordering="user__first_name")
+    def first_name(self):
+        return self.user.first_name
+
+    @admin.display(ordering="user__last_name")
+    def last_name(self):
+        return self.user.last_name
 
 
 class Address(models.Model):
@@ -122,9 +140,9 @@ class OrderItem(models.Model):
     unite_price = models.DecimalField(max_digits=6, decimal_places=2)
 
     # One to Many Relationship
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
+    order = models.ForeignKey(Order, on_delete=models.PROTECT, related_name="items")
     product = models.ForeignKey(
-        Product, on_delete=models.PROTECT, related_name="orderitems"
+        Product, on_delete=models.PROTECT, related_name="order_items"
     )
 
     def __str__(self):
@@ -149,7 +167,9 @@ class CartItem(models.Model):
     quantity = models.PositiveSmallIntegerField(validators=[MinValueValidator(1)])
 
     # One to Many Relationship
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="items")
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="cart_items"
+    )
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="items")
 
     def __str__(self):

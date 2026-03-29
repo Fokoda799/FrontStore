@@ -32,6 +32,17 @@ class OrderItemInline(admin.TabularInline):
     extra = 0
 
 
+class ProductImageInline(admin.TabularInline):
+    model = models.ProductImage
+    readonly_fields = ["thumbnail"]
+    extra = 0
+
+    def thumbnail(self, instance):
+        if instance.image.name != "":
+            return format_html('<img src="{}" class="thumbnail" />', instance.image.url)
+        return ""
+
+
 # =======================
 #          Models
 # =======================
@@ -84,14 +95,18 @@ class ProductAdmin(admin.ModelAdmin):
             messages.SUCCESS,
         )
 
+    class Media:
+        css = {"all": ["store/style.css"]}
+
 
 @admin.register(models.Costumer)
 class CostumerAdmin(admin.ModelAdmin):
     list_display = ["first_name", "last_name", "membership", "orders_count"]
     list_editable = ["membership"]
     list_per_page = 10
-    ordering = ["first_name", "last_name"]
+    ordering = ["user__first_name", "user__last_name"]
     search_fields = ["first_name__istartswith", "last_name__istartswith"]
+    autocomplete_fields = ["user"]
 
     @admin.display(ordering="orders_count")
     def orders_count(self, costumer):

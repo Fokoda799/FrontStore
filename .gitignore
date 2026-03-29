@@ -23,7 +23,7 @@ media/
 */migrations/__pycache__/
 
 # Static files
-staticfiles/
+static/
 
 # Environment variables
 .env
