@@ -1,3 +1,5 @@
+import os
+
 from .common import *  # noqa: F403
 
 DEBUG = True
@@ -14,5 +16,19 @@ DATABASES = {
         "USER": "root",
         "PASSWORD": "wac2003A",
         # 'CONN_MAX_AGE': 60
+    }
+}
+
+REDIS_URL = os.environ["REDIS_URL"]
+
+CELERY_BROKER_URL = REDIS_URL
+
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": REDIS_URL,
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
     }
 }

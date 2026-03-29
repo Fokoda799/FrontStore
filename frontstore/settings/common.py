@@ -157,23 +157,11 @@ DEFAULT_FROM_EMAIL = "from@fokoda.com"
 ADMINS = [("Siad", "admin@fokoda.com")]
 
 
-CELERY_BROKER_URL = "redis://localhost:6379/1"
 CELERY_BEAT_SCHEDULE = {
     "notify_costumers": {
         "task": "playground.tasks.notify_costumers",
         "schedule": 5,
         "args": ["Hello World!"],
-    }
-}
-
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/2",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
     }
 }
 
