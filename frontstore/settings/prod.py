@@ -8,7 +8,7 @@ DEBUG = False
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = ["fokoda-prod-ae03eebf133c.herokuapp.com"]
+ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"]
 
 DATABASES = {"default": dj_database_url.config()}
 
