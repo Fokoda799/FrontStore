@@ -8,7 +8,7 @@ DEBUG = False
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 DATABASES = {"default": dj_database_url.config()}
 
 REDIS_URL = os.environ.get("REDIS_URL")
