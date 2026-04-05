@@ -24,3 +24,9 @@ CACHES = {
         },
     }
 }
+
+STATIC_ROOT = os.path.join(BASE_DIR, "static")  # noqa: F405
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),  # noqa: F405
+]
