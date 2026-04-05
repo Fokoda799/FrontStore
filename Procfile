@@ -1,3 +1,2 @@
-release: python manage.py migrate
-web: gunicorn frontstore.wsgi
-worker: celery -A frontstore worker -l info --uid=nobody
+web: python manage.py migrate && gunicorn frontstore.wsgi
+celery: celery -A frontstore worker --loglevel=info --uid=nobody
