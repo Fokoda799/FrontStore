@@ -13,14 +13,20 @@ DATABASES = {"default": dj_database_url.config()}
 
 REDIS_URL = os.environ["REDIS_URL"]
 
-CELERY_BROKER_URL = "redis://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942"  # noqa: E501
+CELERY_BROKER_URL = "rediss://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942"  # noqa: E501
+CELERY_RESULT_BACKEND = "rediss://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942"  # noqa: E501
+# Required for Redis Cloud SSL
+CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": None}
+
+CELERY_RESULT_BACKEND_USE_SSL = {"ssl_cert_reqs": None}
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942",  # noqa: E501
+        "LOCATION": "rediss://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942",  # noqa: E501
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None},
         },
     }
 }
