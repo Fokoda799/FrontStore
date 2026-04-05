@@ -27,6 +27,7 @@ whitenoise = "*"
 gunicorn = "*"
 dj-database-url = "*"
 django-silk = "*"
+drf-spectacular = "*"
 
 [dev-packages]
 pytest = "*"

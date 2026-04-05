@@ -16,11 +16,15 @@ Including another URLconf
 """
 
 from debug_toolbar.toolbar import debug_toolbar_urls
-
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 admin.site.site_header = "FrontStore administration"
 admin.site.index_title = "Admin"
@@ -33,6 +37,13 @@ urlpatterns = [
     path("store/", include("store.urls")),
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.jwt")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/docs/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 ]
 
 if settings.DEBUG:

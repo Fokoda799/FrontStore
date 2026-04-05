@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "debug_toolbar",
     "rest_framework",
+    "drf_spectacular",
     "djoser",
     "silk",
     "playground",
@@ -131,6 +132,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
 SIMPLE_JWT = {"AUTH_HEADER_TYPES": ("JWT",), "ACCESS_TOKEN_LIFETIME": timedelta(days=1)}
@@ -188,4 +190,10 @@ LOGGING = {
             "style": "{",
         }
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "FontStore API",
+    "DESCRIPTION": "API documentation",
+    "VERSION": "1.0.0",
 }
