@@ -1,3 +1,4 @@
+from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
@@ -11,12 +12,11 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from django.db.models import Count
-
 from . import models, serializers
 from .filters import ProductFilter
 from .pagination import DefaultPagination
 from .permissions import AdminOrReadOnly
+from .tasks import create_random_product
 
 
 class CollectionViewSet(ModelViewSet):
@@ -85,6 +85,11 @@ class CartsViewSet(
 
     def get_serializer_context(self):
         return {"method": self.request.method}
+
+    def perform_create(self, serializer):
+        cart = serializer.save()
+        create_random_product.delay()
+        return cart
 
 
 class CartItemViewSet(ModelViewSet):
