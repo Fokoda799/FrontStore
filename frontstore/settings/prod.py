@@ -8,10 +8,7 @@ DEBUG = False
 
 SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS", "localhost,127.0.0.1"
-).split(",")
-
+ALLOWED_HOSTS = ALLOWED_HOSTS = ["web-production-00984.up.railway.app"]
 DATABASES = {"default": dj_database_url.config()}
 
 REDIS_URL = os.environ.get("REDIS_URL")
