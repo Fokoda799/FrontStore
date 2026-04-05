@@ -4,7 +4,12 @@ DEBUG = True
 
 SECRET_KEY = "django-insecure-r-n#9jk6j(i3ot0v-mj*49_sikp6mn-(q+p_2u$(9$8l(kd9sy"
 
-MIDDLEWARE += ["silk.middleware.SilkyMiddleware"]  # noqa: F405
+INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
+
+MIDDLEWARE += [  # noqa: F405
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "silk.middleware.SilkyMiddleware",
+]
 
 DATABASES = {
     "default": {
