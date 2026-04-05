@@ -14,6 +14,8 @@ DATABASES = {"default": dj_database_url.config()}
 REDIS_URL = os.environ.get("REDIS_URL")
 
 CELERY_BROKER_URL = REDIS_URL
+CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": "none"}
+CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": "none"}
 
 CACHES = {
     "default": {
