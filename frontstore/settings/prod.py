@@ -12,12 +12,14 @@ ALLOWED_HOSTS = ["fokoda-prod-ae03eebf133c.herokuapp.com"]
 
 DATABASES = {"default": dj_database_url.config()}
 
-CELERY_BROKER_URL = "redis://localhost:6379/1"
+REDIS_URL = os.environ.get("REDIS_URL")
+
+CELERY_BROKER_URL = REDIS_URL
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/2",
+        "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },

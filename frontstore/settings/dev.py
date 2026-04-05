@@ -1,5 +1,3 @@
-import os
-
 from .common import *  # noqa: F403
 
 DEBUG = True
@@ -19,14 +17,12 @@ DATABASES = {
     }
 }
 
-REDIS_URL = os.environ["REDIS_URL"]
-
-CELERY_BROKER_URL = REDIS_URL
+CELERY_BROKER_URL = "redis://localhost:6379/1"
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
+        "LOCATION": "redis://127.0.0.1:6379/2",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },

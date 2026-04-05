@@ -1,7 +1,7 @@
 import pytest
-from rest_framework.test import APIClient
-
 from django.contrib.auth import get_user_model
+from django.core.files.uploadedfile import SimpleUploadedFile
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
@@ -46,3 +46,12 @@ def authenticate(api_client):
         api_client.force_authenticate(user=user)
 
     return do_auth
+
+
+@pytest.fixture
+def image_file():
+    return SimpleUploadedFile(
+        name="test.jpg",
+        content=b"file_content",
+        content_type="image/jpeg",
+    )
