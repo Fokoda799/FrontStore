@@ -11,11 +11,11 @@ SECRET_KEY = os.environ["SECRET_KEY"]
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
 DATABASES = {"default": dj_database_url.config()}
 
-REDIS_URL = os.environ.get("REDIS_URL")
+REDIS_URL = os.environ["REDIS_URL"]
 
-CELERY_BROKER_URL = REDIS_URL
-CELERY_BROKER_USE_SSL = {"ssl_cert_reqs": "none"}
-CELERY_REDIS_BACKEND_USE_SSL = {"ssl_cert_reqs": "none"}
+# Strip rediss:// and rebuild with ssl_cert_reqs parameter
+CELERY_BROKER_URL = REDIS_URL + "?ssl_cert_reqs=none"
+CELERY_RESULT_BACKEND = REDIS_URL + "?ssl_cert_reqs=none"
 
 CACHES = {
     "default": {
