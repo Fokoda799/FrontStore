@@ -161,13 +161,13 @@ DEFAULT_FROM_EMAIL = "from@fokoda.com"
 ADMINS = [("Siad", "admin@fokoda.com")]
 
 
-CELERY_BEAT_SCHEDULE = {
-    "notify_costumers": {
-        "task": "playground.tasks.notify_costumers",
-        "schedule": 5,
-        "args": ["Hello World!"],
-    }
-}
+# CELERY_BEAT_SCHEDULE = {
+#     "notify_costumers": {
+#         "task": "playground.tasks.notify_costumers",
+#         "schedule": 5,
+#         "args": ["Hello World!"],
+#     }
+# }
 
 
 LOGGING = {
