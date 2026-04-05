@@ -32,7 +32,6 @@ admin.site.index_title = "Admin"
 urlpatterns = [
     path("", include("core.urls")),
     path("admin/", admin.site.urls),
-    path("play/", include("playground.urls")),
     path("store/", include("store.urls")),
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.jwt")),
@@ -52,5 +51,8 @@ if settings.DEBUG:
         urlpatterns
         + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
         + debug_toolbar_urls()
-        + [path("silk/", include("silk.urls", namespace="silk"))]
+        + [
+            path("silk/", include("silk.urls", namespace="silk")),
+            path("play/", include("playground.urls")),
+        ]
     )

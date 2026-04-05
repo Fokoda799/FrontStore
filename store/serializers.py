@@ -1,8 +1,8 @@
+from django.db import transaction
 from rest_framework import serializers
 
-from django.db import transaction
-
 from . import models
+from .tasks import create_random_product
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -82,6 +82,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     def calc_total_price(self, cart):
         if self.context["method"] == "POST":
+            create_random_product.delay()
             return 0
 
         if not hasattr(cart, "item") or not cart.items.exists():
