@@ -13,10 +13,6 @@ DATABASES = {"default": dj_database_url.config()}
 
 REDIS_URL = os.environ["REDIS_URL"]
 
-# Strip rediss:// and rebuild with ssl_cert_reqs parameter
-CELERY_BROKER_URL = REDIS_URL + "?ssl_cert_reqs=none"
-CELERY_RESULT_BACKEND = REDIS_URL + "?ssl_cert_reqs=none"
-
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
