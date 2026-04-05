@@ -25,6 +25,8 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from core import views as core_views
+
 admin.site.site_header = "FrontStore administration"
 admin.site.index_title = "Admin"
 
@@ -42,6 +44,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
+    path("health/redis/", core_views.redis_health, name="redis-health"),
 ]
 
 if settings.DEBUG:

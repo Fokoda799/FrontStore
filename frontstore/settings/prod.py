@@ -1,5 +1,4 @@
 import os
-import ssl
 
 import dj_database_url
 
@@ -14,19 +13,14 @@ DATABASES = {"default": dj_database_url.config()}
 
 REDIS_URL = os.environ["REDIS_URL"]
 
-CELERY_BROKER_URL = REDIS_URL
-CELERY_BROKER_USE_SSL = {
-    "ssl_ca_certs": "/redis_ca.pem",
-    "ssl_cert_reqs": ssl.CERT_REQUIRED,
-}
+CELERY_BROKER_URL = "redis://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942"  # noqa: E501
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": REDIS_URL,
+        "LOCATION": "redis://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942",  # noqa: E501
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-            "CONNECTION_POOL_KWARGS": {"ssl_cert_reqs": None},
         },
     }
 }

@@ -22,12 +22,12 @@ DATABASES = {
     }
 }
 
-CELERY_BROKER_URL = "redis://localhost:6379/1"
+CELERY_BROKER_URL = "redis://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942"  # noqa: E501
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/2",
+        "LOCATION": "redis://default:nVqgWiHe40XLgUITWQzC4DuBw6u4quHj@redis-16942.c44.us-east-1-2.ec2.cloud.redislabs.com:16942",  # noqa: E501
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
