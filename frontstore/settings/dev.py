@@ -1,3 +1,5 @@
+import os
+
 from .common import *  # noqa: F403
 
 # Load .env for local development without extra dependencies.
@@ -15,7 +17,12 @@ if os.path.exists(env_path):  # noqa: F405
 
 DEBUG = True
 
-SECRET_KEY = "django-insecure-r-n#9jk6j(i3ot0v-mj*49_sikp6mn-(q+p_2u$(9$8l(kd9sy"
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-r-n#9jk6j(i3ot0v-mj*49_sikp6mn-(q+p_2u$(9$8l(kd9sy",
+)
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
 
@@ -26,16 +33,16 @@ MIDDLEWARE += [  # noqa: F405
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-        "NAME": "frontstore",
-        "HOST": "localhost",
-        "USER": "root",
-        "PASSWORD": "wac2003A",
+        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.mysql"),
+        "NAME": os.environ.get("DB_NAME", "frontstore"),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "USER": os.environ.get("DB_USER", "root"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "wac2003A"),
         # 'CONN_MAX_AGE': 60
     }
 }
 
-REDIS_URL = "redis://localhost:6379/0"
+REDIS_URL = os.environ.get("REDIS_URL", "redis://localhost:6379/0")
 
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = "django-db"  # store results in your local DB

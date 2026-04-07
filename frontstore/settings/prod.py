@@ -6,9 +6,9 @@ from .common import *  # noqa: F401, F403
 
 DEBUG = False
 
-SECRET_KEY = os.environ.get("SECRET_KEY", "SECRET_KEY")
+SECRET_KEY = os.environ["SECRET_KEY"]
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost").split(",")
+ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
 DATABASES = {"default": dj_database_url.config()}
 
 REDIS_URL = os.environ["REDIS_URL"]
@@ -32,6 +32,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "")

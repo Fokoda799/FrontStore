@@ -2,18 +2,7 @@ from django.db import transaction
 from rest_framework import serializers
 
 from . import models
-from .utils import send_email
-
-
-class EmailTestSerializer(serializers.Serializer):
-    subject = serializers.CharField(
-        required=False, allow_blank=True, default="Frontstore test email"
-    )
-    message = serializers.CharField(
-        required=False,
-        allow_blank=True,
-        default="This is a test email from Frontstore.",
-    )
+from .tasks import send_order_confirmation_email
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -93,7 +82,6 @@ class CartSerializer(serializers.ModelSerializer):
 
     def calc_total_price(self, cart):
         if self.context["method"] == "POST":
-            send_email
             return 0
 
         if not hasattr(cart, "item") or not cart.items.exists():
@@ -174,7 +162,7 @@ class CreateOrderSerializer(serializers.Serializer):
     def validate_cart_id(self, value):
         if not models.Cart.objects.filter(pk=value):
             raise serializers.ValidationError("No cart with the given ID was found!")
-        if models.CartItem.objects.filter(pk=value).count() == 0:
+        if models.CartItem.objects.filter(cart_id=value).count() == 0:
             raise serializers.ValidationError("The cart is empty!")
         return value
 
@@ -200,5 +188,7 @@ class CreateOrderSerializer(serializers.Serializer):
 
             models.OrderItem.objects.bulk_create(order_items)
             models.Cart.objects.filter(pk=cart_id).delete()
+
+            transaction.on_commit(lambda: send_order_confirmation_email.delay(order.id))
 
             return order
