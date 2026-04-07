@@ -1,3 +1,4 @@
+# from django.conf import settings
 from django.db.models import Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
@@ -16,6 +17,7 @@ from . import models, serializers
 from .filters import ProductFilter
 from .pagination import DefaultPagination
 from .permissions import AdminOrReadOnly
+from .utils import send_email
 
 
 class CollectionViewSet(ModelViewSet):
@@ -164,3 +166,24 @@ class ProductImageViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         return {"product_id": self.kwargs["product_pk"]}
+
+
+class EmailTestViewSet(GenericViewSet):
+    http_method_names = ["post"]
+    # permission_classes = [IsAdminUser]
+    serializer_class = serializers.EmailTestSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        subject = serializer.validated_data.get("subject")
+        message = serializer.validated_data.get("message")
+        recipients = ["feyt2003@gmail.com"]
+        send_email(subject, message, recipients)
+        return Response(
+            {
+                "status": "sent",
+                "recipients": ["feyt2003@gmail.com"],
+                "subject": subject,
+            }
+        )

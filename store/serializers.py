@@ -2,6 +2,18 @@ from django.db import transaction
 from rest_framework import serializers
 
 from . import models
+from .utils import send_email
+
+
+class EmailTestSerializer(serializers.Serializer):
+    subject = serializers.CharField(
+        required=False, allow_blank=True, default="Frontstore test email"
+    )
+    message = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        default="This is a test email from Frontstore.",
+    )
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -81,6 +93,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     def calc_total_price(self, cart):
         if self.context["method"] == "POST":
+            send_email
             return 0
 
         if not hasattr(cart, "item") or not cart.items.exists():
