@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "django_celery_results",
     "silk",
     "playground",
+    "payment",
     "store",
     "tags",
     "core",
@@ -78,6 +79,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.csrf",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -200,3 +202,9 @@ SPECTACULAR_SETTINGS = {
 CELERY_TIMEZONE = "UTC"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60  # tasks auto-killed after 30 minutes
+
+
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")  # starts with pk_
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")  # starts with sk_
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")  # starts with whsec_
+CURRENCY = os.environ.get("CURRENCY", "mad")

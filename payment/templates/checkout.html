@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Checkout</title>
+
+    <!-- Stripe JS -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-top: #f4fbf8;
+            --bg-bottom: #f2f5ff;
+            --ink: #1d2a44;
+            --muted: #5f6f88;
+            --panel: #ffffff;
+            --panel-border: #dce6f6;
+            --brand: #0c8f7a;
+            --brand-hover: #0a7766;
+            --danger: #b13a2a;
+            --danger-bg: #fff0ed;
+            --success: #1b7f46;
+            --success-bg: #eefcf4;
+            --ring: rgba(12, 143, 122, 0.28);
+            --shadow: 0 20px 50px rgba(20, 40, 80, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 24px;
+            display: grid;
+            place-items: center;
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(80rem 40rem at 10% -10%, #d6f4eb 0%, transparent 55%),
+                radial-gradient(70rem 36rem at 95% 110%, #d8e3ff 0%, transparent 50%),
+                linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+        }
+
+        .checkout-shell {
+            width: 100%;
+            max-width: 820px;
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            animation: panel-enter 500ms ease-out;
+        }
+
+        .checkout-meta {
+            padding: 34px 30px;
+            background:
+                linear-gradient(165deg, #0d2e4f 0%, #194a73 52%, #1f5f7f 100%);
+            color: #f6fbff;
+            position: relative;
+            isolation: isolate;
+        }
+
+        .checkout-meta::before,
+        .checkout-meta::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            border-radius: 999px;
+            opacity: 0.38;
+            filter: blur(1px);
+        }
+
+        .checkout-meta::before {
+            width: 220px;
+            height: 220px;
+            right: -50px;
+            top: -60px;
+            background: #42d4c6;
+        }
+
+        .checkout-meta::after {
+            width: 180px;
+            height: 180px;
+            left: -70px;
+            bottom: -90px;
+            background: #9bc3ff;
+        }
+
+        .eyebrow {
+            margin: 0;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            font-size: 11px;
+            font-weight: 700;
+            opacity: 0.86;
+        }
+
+        h1 {
+            font-family: "Fraunces", Georgia, serif;
+            margin: 12px 0 10px;
+            font-size: clamp(1.8rem, 3vw, 2.4rem);
+            line-height: 1.08;
+        }
+
+        .lead {
+            margin: 0;
+            font-size: 0.98rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            max-width: 34ch;
+        }
+
+        .amount-pill {
+            margin-top: 22px;
+            display: inline-flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 12px 16px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.17);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            font-weight: 600;
+        }
+
+        .amount-pill strong {
+            font-size: 1.2rem;
+            font-family: "Fraunces", Georgia, serif;
+        }
+
+        .meta-points {
+            margin-top: 20px;
+            display: grid;
+            gap: 10px;
+            font-size: 0.92rem;
+            opacity: 0.92;
+        }
+
+        .meta-points span {
+            opacity: 0.95;
+        }
+
+        .checkout-form {
+            padding: 34px 30px;
+            display: grid;
+            align-content: center;
+            gap: 16px;
+        }
+
+        .checkout-form > * {
+            opacity: 0;
+            transform: translateY(8px);
+            animation: rise-in 420ms ease-out forwards;
+        }
+
+        .checkout-form > *:nth-child(1) {
+            animation-delay: 80ms;
+        }
+
+        .checkout-form > *:nth-child(2) {
+            animation-delay: 140ms;
+        }
+
+        .checkout-form > *:nth-child(3) {
+            animation-delay: 200ms;
+        }
+
+        .checkout-form > *:nth-child(4) {
+            animation-delay: 260ms;
+        }
+
+        .checkout-form > *:nth-child(5) {
+            animation-delay: 320ms;
+        }
+
+        .card-label {
+            margin: 0;
+            font-size: 0.84rem;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+
+        #card-element {
+            padding: 12px;
+            border: 1px solid #cad7ef;
+            border-radius: 12px;
+            background: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        #card-element:focus-within {
+            border-color: var(--brand);
+            box-shadow: 0 0 0 5px var(--ring);
+        }
+
+        button {
+            padding: 12px 18px;
+            font-size: 0.96rem;
+            font-weight: 700;
+            border: 0;
+            border-radius: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, var(--brand), #129e86);
+            cursor: pointer;
+            transition: transform 0.14s ease, filter 0.18s ease;
+        }
+
+        button:hover {
+            filter: brightness(0.97);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            cursor: not-allowed;
+            opacity: 0.62;
+            transform: none;
+            filter: grayscale(0.15);
+        }
+
+        .helper {
+            margin: 2px 0 0;
+            font-size: 0.82rem;
+            color: var(--muted);
+        }
+
+        #error-message {
+            color: var(--danger);
+            margin-top: 0;
+            font-size: 0.9rem;
+            min-height: 20px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: var(--danger-bg);
+            display: none;
+        }
+
+        #success-message {
+            color: var(--success);
+            margin-top: 0;
+            font-size: 0.9rem;
+            min-height: 20px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: var(--success-bg);
+            display: none;
+        }
+
+        @media (max-width: 820px) {
+            .checkout-shell {
+                grid-template-columns: 1fr;
+            }
+
+            .checkout-meta,
+            .checkout-form {
+                padding: 24px;
+            }
+        }
+
+        @keyframes panel-enter {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.99);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes rise-in {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<main class="checkout-shell">
+    <section class="checkout-meta" aria-label="Order summary">
+        <p class="eyebrow">Secure Checkout</p>
+        <h1>Finish your order in a minute.</h1>
+        <p class="lead">
+            Payments are encrypted and processed by Stripe. Your card details never touch our servers.
+        </p>
+        <p class="amount-pill">
+            Total
+            <strong id="amount-display"></strong>
+        </p>
+        <div class="meta-points">
+            <span>256-bit TLS secure session</span>
+            <span>Automatic receipt from Stripe</span>
+            <span>Supports major debit and credit cards</span>
+        </div>
+    </section>
+
+    <form id="payment-form" class="checkout-form" novalidate>
+        {% csrf_token %}
+        <p class="card-label">Card details</p>
+
+        <!-- Stripe Card Input -->
+        <div id="card-element"></div>
+
+        <button id="submit" type="submit">
+            Pay Now
+        </button>
+
+        <p class="helper">Do not refresh while the payment is processing.</p>
+
+        <div id="error-message" role="alert" aria-live="polite"></div>
+        <div id="success-message" role="status" aria-live="polite"></div>
+    </form>
+</main>
+
+<script>
+
+const amountCents = Number("{{ payment_amount|default:'1000' }}");
+
+const safeAmountCents = Number.isFinite(amountCents) && amountCents > 0
+    ? amountCents
+    : 1000;
+
+document.getElementById("amount-display").textContent = new Intl.NumberFormat(
+    "en-US",
+    {
+        style: "currency",
+        currency: "MAD",
+    }
+).format(safeAmountCents / 100);
+
+// Publishable key from Django template
+const stripe = Stripe("{{ stripe_publishable_key }}");
+
+// Create Stripe Elements
+const elements = stripe.elements();
+
+// Create card element
+const cardElement = elements.create("card", {
+    hidePostalCode: true,
+    style: {
+        base: {
+            color: "#1d2a44",
+            fontFamily: "Space Grotesk, Segoe UI, sans-serif",
+            fontSize: "16px",
+            "::placeholder": {
+                color: "#8a96ad"
+            }
+        },
+        invalid: {
+            color: "#b13a2a"
+        }
+    }
+});
+
+// Mount card UI
+cardElement.mount("#card-element");
+
+const form = document.getElementById("payment-form");
+const submitButton = document.getElementById("submit");
+const errorMessage = document.getElementById("error-message");
+const successMessage = document.getElementById("success-message");
+const csrfTokenInput = document.querySelector("input[name='csrfmiddlewaretoken']");
+const csrfToken = csrfTokenInput ? csrfTokenInput.value : "{{ csrf_token }}";
+
+const setLoadingState = (isLoading) => {
+    submitButton.disabled = isLoading;
+    submitButton.textContent = isLoading ? "Processing..." : "Pay Now";
+};
+
+const showError = (message) => {
+    errorMessage.style.display = "block";
+    successMessage.style.display = "none";
+    errorMessage.textContent = message;
+};
+
+const showSuccess = (message) => {
+    successMessage.style.display = "block";
+    errorMessage.style.display = "none";
+    successMessage.textContent = message;
+};
+
+
+// Handle form submit
+form.addEventListener("submit", async (event) => {
+
+    event.preventDefault();
+
+    errorMessage.style.display = "none";
+    successMessage.style.display = "none";
+    errorMessage.textContent = "";
+    successMessage.textContent = "";
+    setLoadingState(true);
+
+    try {
+
+        // Step 1 — Get client_secret from backend
+        const response = await fetch("/payment/create-payment-intent/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrfToken
+            },
+            body: JSON.stringify({
+                amount: safeAmountCents
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Unable to create payment intent.");
+        }
+
+        const data = await response.json();
+
+        if (!data.client_secret) {
+            throw new Error(data.error || "Payment setup failed.");
+        }
+
+        const clientSecret = data.client_secret;
+
+        // Step 2 — Confirm payment
+        const result = await stripe.confirmCardPayment(
+            clientSecret,
+            {
+                payment_method: {
+                    card: cardElement,
+                }
+            }
+        );
+
+        // Step 3 — Handle result
+        if (result.error) {
+            showError(result.error.message || "Payment failed. Please try again.");
+        }
+
+        else if (
+            result.paymentIntent.status === "succeeded"
+        ) {
+            showSuccess("Payment successful! Your order is now confirmed.");
+
+            // Optional: notify backend
+            await fetch("/payment/confirm-order/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({
+                    payment_intent: result.paymentIntent.id
+                })
+            });
+
+        }
+
+    }
+
+    catch (error) {
+        showError(error.message || "Payment failed. Try again.");
+        console.error(error);
+
+    }
+
+    finally {
+        setLoadingState(false);
+    }
+
+});
+
+</script>
+
+</body>
+</html>

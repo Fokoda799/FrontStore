@@ -29,6 +29,7 @@ celery = "*"
 redis = "*"
 django-redis = "*"
 django-celery-results = "*"
+stripe = "*"
 
 [dev-packages]
 pytest = "*"
