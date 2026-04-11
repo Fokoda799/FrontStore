@@ -143,21 +143,33 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     costumer = serializers.StringRelatedField(read_only=True)
+    status = serializers.CharField(read_only=True)
     payment_status = serializers.CharField(read_only=True)
+    payment_method = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.Order
-        fields = ["id", "costumer", "payment_status", "placed_at", "items"]
+        fields = [
+            "id",
+            "costumer",
+            "status",
+            "payment_status",
+            "payment_method",
+            "placed_at",
+            "items",
+            "total_amount",
+        ]
 
 
 class UpdateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Order
-        fields = ["payment_status"]
+        fields = ["payment_status", "status", "payment_method"]
 
 
 class CreateOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()
+    payment_method = serializers.ChoiceField(choices=models.Order.PAYMENT_METHOD)
 
     def validate_cart_id(self, value):
         if not models.Cart.objects.filter(pk=value):
@@ -169,9 +181,12 @@ class CreateOrderSerializer(serializers.Serializer):
     def save(self, **kwargs):
         with transaction.atomic():
             cart_id = self.validated_data["cart_id"]
+            payment_method = self.validated_data["payment_method"]
 
             costumer = models.Costumer.objects.get(user_id=self.context["user_id"])
-            order = models.Order.objects.create(costumer=costumer)
+            order = models.Order.objects.create(
+                costumer=costumer, payment_method=payment_method
+            )
 
             cart_items = models.CartItem.objects.prefetch_related("product").filter(
                 cart_id=cart_id

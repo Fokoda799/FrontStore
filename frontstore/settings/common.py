@@ -207,4 +207,5 @@ CELERY_TASK_TIME_LIMIT = 30 * 60  # tasks auto-killed after 30 minutes
 STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY")  # starts with pk_
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY")  # starts with sk_
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET")  # starts with whsec_
-CURRENCY = os.environ.get("CURRENCY", "mad")
+PAYMENT_CURRENCY = os.environ.get("CURRENCY", "mad")
+PAYMENT_PAYABLE_MODEL = "store.Order"

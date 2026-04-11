@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thank You | FrontStore</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+
+    <style>
+        :root {
+            --bg-top: #f6fbf8;
+            --bg-bottom: #eef4ff;
+            --ink: #1d2a44;
+            --muted: #576887;
+            --panel: #ffffff;
+            --panel-border: #dce6f6;
+            --brand: #0c8f7a;
+            --brand-dark: #0a7766;
+            --shadow: 0 24px 60px rgba(20, 40, 80, 0.14);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 24px;
+            display: grid;
+            place-items: center;
+            font-family: "Space Grotesk", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                radial-gradient(80rem 40rem at 8% -10%, #d7f5ec 0%, transparent 55%),
+                radial-gradient(72rem 36rem at 98% 115%, #d8e4ff 0%, transparent 50%),
+                linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+        }
+
+        .card {
+            width: 100%;
+            max-width: 700px;
+            border-radius: 24px;
+            border: 1px solid var(--panel-border);
+            box-shadow: var(--shadow);
+            background: var(--panel);
+            padding: 34px 30px;
+            text-align: center;
+            animation: pop-in 500ms ease-out;
+        }
+
+        .checkmark {
+            width: 66px;
+            height: 66px;
+            margin: 0 auto 16px;
+            border-radius: 999px;
+            display: grid;
+            place-items: center;
+            background: #e7faf2;
+            color: var(--brand);
+            font-size: 30px;
+            font-weight: 700;
+        }
+
+        h1 {
+            margin: 0;
+            font-family: "Fraunces", Georgia, serif;
+            font-size: clamp(1.9rem, 4vw, 2.5rem);
+            line-height: 1.08;
+        }
+
+        p {
+            margin: 14px auto 0;
+            max-width: 45ch;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .order-pill {
+            margin: 18px auto 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            color: #0e3764;
+            background: #edf3ff;
+            border: 1px solid #d9e5ff;
+        }
+
+        .actions {
+            margin-top: 24px;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            text-decoration: none;
+            border-radius: 12px;
+            padding: 11px 16px;
+            font-weight: 700;
+            transition: transform 0.14s ease, filter 0.18s ease;
+        }
+
+        .btn-primary {
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--brand), #12a78d);
+        }
+
+        .btn-secondary {
+            color: #21446f;
+            background: #edf3ff;
+            border: 1px solid #d6e3ff;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(0.98);
+        }
+
+        @media (max-width: 700px) {
+            .card {
+                padding: 26px 22px;
+            }
+        }
+
+        @keyframes pop-in {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(0.99);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="checkmark" aria-hidden="true">✓</div>
+        <h1>Thank you for your payment</h1>
+        <p>
+            Your transaction was completed successfully. We have started processing your order and will keep you updated.
+        </p>
+
+        {% if order_id %}
+            <p class="order-pill">Order #{{ order_id }}</p>
+        {% endif %}
+
+        <div class="actions">
+            {% if order_id %}
+                <a class="btn btn-primary" href="/store/orders/{{ order_id }}/">View Order</a>
+            {% endif %}
+            <a class="btn btn-secondary" href="/">Continue Shopping</a>
+        </div>
+    </main>
+</body>
+</html>

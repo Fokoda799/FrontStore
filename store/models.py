@@ -114,6 +114,10 @@ class Address(models.Model):
 
 
 class Order(models.Model):
+
+    # ── Payment Status ─────────────────────────────────────────────
+    # Answers: "has money moved for this order?"
+    # Driven entirely by the payment app via signals → core → here
     PAYMENT_STATUS_PENDING = "P"
     PAYMENT_STATUS_COMPLETED = "C"
     PAYMENT_STATUS_FAILED = "F"
@@ -123,16 +127,76 @@ class Order(models.Model):
         (PAYMENT_STATUS_FAILED, "Failed"),
     ]
 
+    # ── Order Status ───────────────────────────────────────────────
+    # Answers: "where is this order in its fulfillment lifecycle?"
+    # Driven by your store logic — packing, shipping, delivery, etc.
+    ORDER_STATUS_PENDING = "P"
+    ORDER_STATUS_PROCESSING = "R"
+    ORDER_STATUS_SHIPPED = "S"
+    ORDER_STATUS_DELIVERED = "D"
+    ORDER_STATUS_CANCELLED = "C"
+    ORDER_STATUS = [
+        (ORDER_STATUS_PENDING, "Pending"),
+        (ORDER_STATUS_PROCESSING, "Processing"),
+        (ORDER_STATUS_SHIPPED, "Shipped"),
+        (ORDER_STATUS_DELIVERED, "Delivered"),
+        (ORDER_STATUS_CANCELLED, "Cancelled"),
+    ]
+
+    # ── Payment Method ─────────────────────────────────────────────
+    PAYMENT_METHOD_CARD = "CD"
+    PAYMENT_METHOD_CASH = "CA"
+    PAYMENT_METHOD = [
+        (PAYMENT_METHOD_CARD, "Card"),
+        (PAYMENT_METHOD_CASH, "Cash"),
+    ]
+
+    # ── Fields ────────────────────────────────────────────────────
     placed_at = models.DateTimeField(auto_now_add=True)
     payment_status = models.CharField(
-        max_length=1, choices=PAYMENT_STATUS, default=PAYMENT_STATUS_PENDING
+        max_length=1,
+        choices=PAYMENT_STATUS,
+        default=PAYMENT_STATUS_PENDING,
     )
-
-    # One to Many Relationship
+    order_status = models.CharField(
+        max_length=1,
+        choices=ORDER_STATUS,
+        default=ORDER_STATUS_PENDING,
+    )
+    payment_method = models.CharField(
+        max_length=2,
+        choices=PAYMENT_METHOD,
+        null=True,
+        blank=True,
+    )
     costumer = models.ForeignKey(Costumer, on_delete=models.PROTECT)
 
+    # ── Mixin contract ────────────────────────────────────────────
+    @property
+    def total_amount(self):
+        result = self.items.aggregate(
+            total=models.Sum(
+                models.ExpressionWrapper(
+                    models.F("quantity") * models.F("unite_price"),
+                    output_field=models.DecimalField(),
+                )
+            )
+        )
+        return result["total"] or 0
+
+    def is_payable_by(self, user):
+        return (
+            self.costumer.user_id == user.id
+            and self.payment_status == self.PAYMENT_STATUS_PENDING
+            and self.order_status != self.ORDER_STATUS_CANCELLED
+        )
+
+    @property
+    def requires_online_payment(self):
+        return self.payment_method == self.PAYMENT_METHOD_CARD
+
     def __str__(self):
-        return f"ORDER-{self.id}-{self.payment_status}"
+        return f"ORDER-{self.id}-{self.order_status}-{self.payment_status}"
 
     class Meta:
         ordering = ["placed_at"]
@@ -147,6 +211,10 @@ class OrderItem(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.PROTECT, related_name="order_items"
     )
+
+    @property
+    def total_price(self):
+        return self.quantity * self.unite_price
 
     def __str__(self):
         return f"ITEM-{self.id}"

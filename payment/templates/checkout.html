@@ -292,41 +292,45 @@
 </head>
 
 <body>
-<main class="checkout-shell">
-    <section class="checkout-meta" aria-label="Order summary">
-        <p class="eyebrow">Secure Checkout</p>
-        <h1>Finish your order in a minute.</h1>
-        <p class="lead">
-            Payments are encrypted and processed by Stripe. Your card details never touch our servers.
-        </p>
-        <p class="amount-pill">
-            Total
-            <strong id="amount-display"></strong>
-        </p>
-        <div class="meta-points">
-            <span>256-bit TLS secure session</span>
-            <span>Automatic receipt from Stripe</span>
-            <span>Supports major debit and credit cards</span>
-        </div>
-    </section>
+    <main class="checkout-shell">
+        <section class="checkout-meta" aria-label="Order summary">
+            <p class="eyebrow">Secure Checkout</p>
+            <h1>Finish your order in a minute.</h1>
+            <p class="lead">
+                Payments are encrypted and processed by Stripe. Your card details never touch our servers.
+            </p>
+            <p class="amount-pill">
+                Total
+                <strong id="amount-display"></strong>
+            </p>
+            <div class="meta-points">
+                <span>256-bit TLS secure session</span>
+                <span>Automatic receipt from Stripe</span>
+                <span>Supports major debit and credit cards</span>
+            </div>
+        </section>
 
-    <form id="payment-form" class="checkout-form" novalidate>
-        {% csrf_token %}
-        <p class="card-label">Card details</p>
+        <form id="payment-form" class="checkout-form" novalidate>
+            {% csrf_token %}
+            <p class="card-label">Card details</p>
 
-        <!-- Stripe Card Input -->
-        <div id="card-element"></div>
+            <div>
+                <input id="order" type="text" required name="order-id" placeholder="Order Id..." />
+            </div>
 
-        <button id="submit" type="submit">
-            Pay Now
-        </button>
+            <!-- Stripe Card Input -->
+            <div id="card-element"></div>
 
-        <p class="helper">Do not refresh while the payment is processing.</p>
+            <button id="submit" type="submit">
+                Pay Now
+            </button>
 
-        <div id="error-message" role="alert" aria-live="polite"></div>
-        <div id="success-message" role="status" aria-live="polite"></div>
-    </form>
-</main>
+            <p class="helper">Do not refresh while the payment is processing.</p>
+
+            <div id="error-message" role="alert" aria-live="polite"></div>
+            <div id="success-message" role="status" aria-live="polite"></div>
+        </form>
+    </main>
 
 <script>
 
@@ -377,6 +381,7 @@ const errorMessage = document.getElementById("error-message");
 const successMessage = document.getElementById("success-message");
 const csrfTokenInput = document.querySelector("input[name='csrfmiddlewaretoken']");
 const csrfToken = csrfTokenInput ? csrfTokenInput.value : "{{ csrf_token }}";
+const input = document.getElementById("order");
 
 const setLoadingState = (isLoading) => {
     submitButton.disabled = isLoading;
@@ -395,6 +400,54 @@ const showSuccess = (message) => {
     successMessage.textContent = message;
 };
 
+const showProcessing = (message) => {
+    successMessage.style.display = "block";
+    errorMessage.style.display = "none";
+    successMessage.textContent = message;
+};
+
+async function pollPaymentStatus(paymentIntentId, maxAttempts = 5) {
+
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+
+        // Wait before each attempt — a little longer each time.
+        // Attempt 1: 1s, Attempt 2: 2s, Attempt 3: 3s, etc.
+        // This gives the webhook progressively more time to arrive.
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+
+        const response = await fetch(
+            `/payment/status/?payment_intent=${paymentIntentId}`
+        );
+        const data = await response.json();
+
+        if (data.status === "S") {
+            showSuccess("Your order is confirmed! We're getting it ready for you.");
+            // Redirect to a dedicated post-payment page.
+            window.location.href = `/payment/thank-you/?order_id=${data.object_id}`;
+            return;
+        }
+
+        if (data.status === "F") {
+            showError("Payment failed. Please try again.");
+            return;
+        }
+
+        // Status is still 'pending' — webhook hasn't arrived yet.
+        // If this is the last attempt, show a neutral message.
+        if (attempt === maxAttempts) {
+            showProcessing(
+                "Your payment is being processed. " +
+                "Check your email shortly for confirmation."
+            );
+        }
+    }
+}
+
+let orderId = 0;
+input.addEventListener("input", function() {
+    orderId = input.value;
+});
+
 
 // Handle form submit
 form.addEventListener("submit", async (event) => {
@@ -408,6 +461,11 @@ form.addEventListener("submit", async (event) => {
     setLoadingState(true);
 
     try {
+        const numericOrderId = Number.parseInt(orderId, 10);
+
+        if (!Number.isInteger(numericOrderId) || numericOrderId <= 0) {
+            throw new Error("Please enter a valid order ID.");
+        }
 
         // Step 1 — Get client_secret from backend
         const response = await fetch("/payment/create-payment-intent/", {
@@ -417,7 +475,8 @@ form.addEventListener("submit", async (event) => {
                 "X-CSRFToken": csrfToken
             },
             body: JSON.stringify({
-                amount: safeAmountCents
+                content_type: "order",
+                object_id: numericOrderId,
             })
         });
 
@@ -451,19 +510,9 @@ form.addEventListener("submit", async (event) => {
         else if (
             result.paymentIntent.status === "succeeded"
         ) {
-            showSuccess("Payment successful! Your order is now confirmed.");
+            showSuccess("Payment received. Confirming your order...");
 
-            // Optional: notify backend
-            await fetch("/payment/confirm-order/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": csrfToken
-                },
-                body: JSON.stringify({
-                    payment_intent: result.paymentIntent.id
-                })
-            });
+            await pollPaymentStatus(result.paymentIntent.id);
 
         }
 
