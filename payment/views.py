@@ -149,7 +149,7 @@ def stripe_webhook(request):
         )
         payment_succeeded.send(
             sender=None,
-            payment_intent_id=stripe_intent_id,
+            stripe_intent_id=stripe_intent_id,
             metadata=payment_intent.get("metadata") or {},
         )
 

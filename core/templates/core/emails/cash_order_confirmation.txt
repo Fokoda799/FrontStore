@@ -1,0 +1,22 @@
+Order Confirmed — Order #{{ order.id }}
+
+Hi {{ costumer_name }},
+
+Thank you for your order. Please have the payment ready upon delivery.
+
+ORDER DETAILS
+─────────────────────────────────
+Order ID:        #{{ order.id }}
+Payment Method:  Cash on Delivery
+Date:            {{ order.placed_at|date:"F j, Y" }}
+
+ITEMS
+─────────────────────────────────
+{% for item in order.items.all %}{{ item.product.title }} x{{ item.quantity }} — {{ item.total_price }}
+{% endfor %}
+─────────────────────────────────
+Amount Due on Delivery: {{ total }}
+
+Please prepare the exact amount when your order arrives.
+
+Thank you for your order.

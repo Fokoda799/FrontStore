@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background: #f4f6fb;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #1d2a44;
+        }
+        .wrapper {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(20,40,80,0.08);
+        }
+        .header {
+            background: linear-gradient(135deg, #3d1a1a, #7a2a2a);
+            padding: 32px 40px;
+            color: #ffffff;
+        }
+        .header h1 { margin: 0 0 4px; font-size: 22px; font-weight: 700; }
+        .header p  { margin: 0; opacity: 0.85; font-size: 14px; }
+        .body { padding: 32px 40px; }
+        .greeting { font-size: 16px; margin-bottom: 20px; }
+        .badge {
+            display: inline-block;
+            background: #fff0ed;
+            color: #b13a2a;
+            border: 1px solid #f5c0b8;
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        .info-table {
+            width: 100%; border-collapse: collapse;
+            margin-bottom: 28px; font-size: 14px;
+        }
+        .info-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #edf0f7;
+        }
+        .info-table td:first-child { color: #5f6f88; width: 40%; }
+        .info-table td:last-child  { font-weight: 600; text-align: right; }
+        .refund-note {
+            background: #fff0ed;
+            border-left: 4px solid #e05a3a;
+            border-radius: 0 8px 8px 0;
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #7a2a1a;
+            margin-top: 8px;
+        }
+        .footer {
+            background: #f4f6fb; padding: 20px 40px;
+            font-size: 12px; color: #8a96ad;
+            text-align: center; border-top: 1px solid #dce6f6;
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+
+    <div class="header">
+        <h1>Order Cancelled</h1>
+        <p>Order #{{ order.id }} &mdash; {{ order.placed_at|date:"F j, Y" }}</p>
+    </div>
+
+    <div class="body">
+        <p class="greeting">Hi {{ costumer_name }},</p>
+        <p>Your order has been cancelled. We're sorry to see it go.</p>
+
+        <span class="badge">&#215; Cancelled</span>
+
+        <table class="info-table">
+            <tr>
+                <td>Order ID</td>
+                <td>#{{ order.id }}</td>
+            </tr>
+            <tr>
+                <td>Placed On</td>
+                <td>{{ order.placed_at|date:"F j, Y" }}</td>
+            </tr>
+            <tr>
+                <td>Payment Method</td>
+                <td>{{ order.get_payment_method_display }}</td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td>Cancelled</td>
+            </tr>
+        </table>
+
+        {% if order.payment_status == 'C' %}
+        <div class="refund-note">
+            <strong>Refund Notice:</strong> Since your order was already paid,
+            a refund will be processed to your original payment method within
+            5&ndash;10 business days.
+        </div>
+        {% else %}
+        <div class="refund-note">
+            No charge was made for this order.
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        If you have questions, please contact our support team.<br>
+        &copy; {% now "Y" %} Your Store. All rights reserved.
+    </div>
+
+</div>
+</body>
+</html>

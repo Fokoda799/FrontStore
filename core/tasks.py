@@ -3,6 +3,8 @@ from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
+from .utils import build_receipt_pdf
+
 
 def _send_email(subject, to, template_name, context, attachments=None):
     """
@@ -27,13 +29,17 @@ def _send_email(subject, to, template_name, context, attachments=None):
     email.send()
 
 
+# ── Task 1 — Payment Receipt (card payment) ───────────────────────────────────
+
+
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def send_cash_order_confirmation_email(self, order_id):
+def send_payment_receipt_email(self, order_id, payment_id):
     """
-    Sends an order confirmation for cash on delivery orders.
-    No PDF receipt — payment hasn't happened yet.
-    Triggered when an order is placed with payment_method=CASH.
+    Sends a payment confirmation email with a PDF receipt attached.
+    Triggered after payment_succeeded signal — card payments only.
+    Retries up to 3 times with 60s delay if the email server is down.
     """
+    from payment.models import Payment
     from store.models import Order
 
     try:
@@ -42,45 +48,27 @@ def send_cash_order_confirmation_email(self, order_id):
             .prefetch_related("items__product")
             .get(id=order_id)
         )
+        payment = Payment.objects.get(id=payment_id)
+
+        pdf_bytes = build_receipt_pdf(order, payment)
 
         _send_email(
-            subject=f"Order Confirmed — Order #{order.id}",
+            subject=f"Payment Confirmed — Order #{order.id}",
             to=order.costumer.user.email,
-            template_name="cash_order_confirmation",
+            template_name="payment_receipt",
             context={
                 "costumer_name": order.costumer.user.get_full_name(),
                 "order": order,
-                "total": f"{order.total_amount / 100:.2f}",
+                "payment": payment,
             },
+            attachments=[
+                (f"receipt-order-{order.id}.pdf", pdf_bytes, "application/pdf")
+            ],
         )
 
     except Exception as exc:
+        # Retry on failure — network blip, email server down, etc.
         raise self.retry(exc=exc)
 
 
-# ── Task 3 — Order Cancelled ──────────────────────────────────────────────────
-
-
-@shared_task(bind=True, max_retries=3, default_retry_delay=60)
-def send_order_cancelled_email(self, order_id):
-    """
-    Sends a cancellation notice.
-    Triggered when order_status changes to CANCELLED.
-    """
-    from store.models import Order
-
-    try:
-        order = Order.objects.select_related("costumer__user").get(id=order_id)
-
-        _send_email(
-            subject=f"Order Cancelled — Order #{order.id}",
-            to=order.costumer.user.email,
-            template_name="order_cancelled",
-            context={
-                "costumer_name": order.costumer.user.get_full_name(),
-                "order": order,
-            },
-        )
-
-    except Exception as exc:
-        raise self.retry(exc=exc)
+# ── Task 2 — Cash Order Confirmation ─────────────────────────────────────────

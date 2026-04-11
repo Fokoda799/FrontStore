@@ -1,0 +1,23 @@
+Payment Confirmed — Order #{{ order.id }}
+
+Hi {{ costumer_name }},
+
+Your payment was successful and your order is now being prepared.
+
+ORDER DETAILS
+─────────────────────────────────
+Order ID:        #{{ order.id }}
+Payment Method:  {{ order.get_payment_method_display }}
+Date:            {{ order.placed_at|date:"F j, Y" }}
+Status:          Paid
+
+ITEMS
+─────────────────────────────────
+{% for item in order.items.all %}{{ item.product.title }} x{{ item.quantity }} — {{ item.total_price }} {{ payment.currency|upper }}
+{% endfor %}
+─────────────────────────────────
+Total Paid: {{ payment.amount|floatformat:2 }} {{ payment.currency|upper }}
+
+Your full receipt is attached as a PDF.
+
+Thank you for your order.

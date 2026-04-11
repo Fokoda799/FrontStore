@@ -2,7 +2,6 @@ from django.db import transaction
 from rest_framework import serializers
 
 from . import models
-from .tasks import send_order_confirmation_email
 
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -164,7 +163,7 @@ class OrderSerializer(serializers.ModelSerializer):
 class UpdateOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Order
-        fields = ["payment_status", "status", "payment_method"]
+        fields = ["payment_status", "order_status"]
 
 
 class CreateOrderSerializer(serializers.Serializer):
@@ -203,7 +202,5 @@ class CreateOrderSerializer(serializers.Serializer):
 
             models.OrderItem.objects.bulk_create(order_items)
             models.Cart.objects.filter(pk=cart_id).delete()
-
-            transaction.on_commit(lambda: send_order_confirmation_email.delay(order.id))
 
             return order

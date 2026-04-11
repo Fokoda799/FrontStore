@@ -30,6 +30,7 @@ redis = "*"
 django-redis = "*"
 django-celery-results = "*"
 stripe = "*"
+reportlab = "*"
 
 [dev-packages]
 pytest = "*"

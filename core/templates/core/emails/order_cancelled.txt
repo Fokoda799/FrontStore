@@ -1,0 +1,20 @@
+Order Cancelled — Order #{{ order.id }}
+
+Hi {{ costumer_name }},
+
+Your order has been cancelled. We're sorry to see it go.
+
+ORDER DETAILS
+─────────────────────────────────
+Order ID:        #{{ order.id }}
+Placed On:       {{ order.placed_at|date:"F j, Y" }}
+Payment Method:  {{ order.get_payment_method_display }}
+Status:          Cancelled
+
+{% if order.payment_status == 'C' %}REFUND NOTICE
+A refund will be processed to your original payment method
+within 5-10 business days.
+{% else %}No charge was made for this order.
+{% endif %}
+
+If you have questions, please contact our support team.
